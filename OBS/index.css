@@ -1,0 +1,45 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans&display=swap');
+
+body {
+    width: 100vw;
+    padding: 4px;
+    margin: 0px;
+
+    background-color: #7A7A7A;
+}
+
+.Text {
+    text-align: end;
+    margin: 12px;
+    margin-bottom: 0px;
+    font-family: 'Noto Sans', sans-serif;
+    font-weight: 400;
+
+    text-shadow: 3px 3px 6px rgba(0,0,0,0.43);
+    
+    
+}
+
+.Text.Small {
+    margin-top: 0;
+    font-size: 14pt;
+}
+
+img {
+    width: 86px;
+    height: 86px;
+    rotate: 1deg;
+}
+
+.obs {
+    display: flex;
+    flex-direction: row;
+    align-content: flex-end;
+    justify-content: flex-end;
+
+    opacity: 0%;
+}
+
+.hidden {
+    display: none;
+}

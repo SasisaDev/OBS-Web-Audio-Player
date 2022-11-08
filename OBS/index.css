@@ -6,6 +6,8 @@ body {
     margin: 0px;
 
     background-color: #7A7A7A;
+
+    overflow: hidden;
 }
 
 .Text {

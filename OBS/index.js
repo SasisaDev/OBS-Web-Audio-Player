@@ -29,6 +29,11 @@ window.addEventListener('load', ()=>{
 function NextSong() {
     animate();
 
+    if(CurrentAudio) {
+        CurrentAudio.pause();
+        delete CurrentAudio;
+    }
+
     fetch('http://localhost:1337/next').then((resp) => {
         resp.json().then((value) => {
             document.getElementById('cross').className = "hidden";

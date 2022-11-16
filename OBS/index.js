@@ -4,7 +4,7 @@ var context = new AudioContext();
 var discRotation = 0;
 
 window.addEventListener('load', ()=>{
-    NextSong();
+    UpdateSong();
     function guardedAnimate() {
         animate();
         setTimeout(guardedAnimate, 45000);
@@ -26,7 +26,7 @@ window.addEventListener('load', ()=>{
     guardedTick();
 })
 
-function NextSong() {
+function UpdateSong(next = false) {
     animate();
 
     if(CurrentAudio) {
@@ -34,7 +34,9 @@ function NextSong() {
         delete CurrentAudio;
     }
 
-    fetch('http://localhost:1337/next').then((resp) => {
+    let URI = next ? `http://localhost:1337/next` : `http://localhost:1337/stream`;
+
+    fetch(URI).then((resp) => {
         resp.json().then((value) => {
             document.getElementById('cross').className = "hidden";
             document.getElementById('disc').className = "";
@@ -43,12 +45,7 @@ function NextSong() {
             document.getElementById('author').textContent = value.author;
             CurrentAudio = new Audio(value.audio);
             CurrentAudio.play();
-            CurrentAudio.onended = NextSong;
-            CurrentAudio.ontimeupdate = () => {
-                fetch(`http://localhost:1337/update_stream/${CurrentAudio.currentTime}`, {
-                    method: 'PUT'
-                })
-            }
+            CurrentAudio.onended = UpdateSong;
         })
     }).catch(reason => {
         document.getElementById('cross').className = "";
@@ -57,7 +54,7 @@ function NextSong() {
         document.getElementById('title').textContent = "Server is down";
         document.getElementById('author').textContent = "Sasisa-San...";
         console.log('Failed fetching /next route');
-        setTimeout(NextSong, 2500);
+        setTimeout(UpdateSong, 2500);
     })
 }
 

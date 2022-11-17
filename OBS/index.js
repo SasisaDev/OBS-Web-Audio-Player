@@ -11,6 +11,7 @@ window.addEventListener('load', ()=>{
     }
     guardedAnimate();
 
+    // Tick each 1/30th of a frame
     function guardedTick() {
         if(discRotation < 360) {
             discRotation++;
@@ -23,12 +24,37 @@ window.addEventListener('load', ()=>{
         setTimeout(guardedTick, 1000/30);
     }
 
+    // Update state of widget from server each 5 seconds
+    function guardedStateTick() {
+        fetch(`http://localhost:1337/stream`).then((resp) => {
+            resp.json().then((value) => {
+                console.log(value)
+
+                // If audio is playing in browser, but not on server - stop it. Otherwise - resume from server time.
+                if(CurrentAudio) {
+                    if(value.isPlaying == true && CurrentAudio.paused === true) {
+                        CurrentAudio.play();
+                        CurrentAudio.currentTime = value.time;
+                    } else if(value.isPlaying == false && CurrentAudio.paused === false){
+                        CurrentAudio.pause();
+                    }
+                }
+            })
+        }).catch((err)=>{
+            InitiateError();
+        });
+
+        setTimeout(guardedStateTick, 1000*5);
+    }
+
     guardedTick();
+    guardedStateTick();
 })
 
 function UpdateSong(next = false) {
     animate();
 
+    // Delete previous song from cache
     if(CurrentAudio) {
         CurrentAudio.pause();
         delete CurrentAudio;
@@ -36,6 +62,7 @@ function UpdateSong(next = false) {
 
     let URI = next ? `http://localhost:1337/next` : `http://localhost:1337/stream`;
 
+    // Fetch new song data
     fetch(URI).then((resp) => {
         resp.json().then((value) => {
             document.getElementById('cross').className = "hidden";
@@ -48,14 +75,20 @@ function UpdateSong(next = false) {
             CurrentAudio.onended = UpdateSong;
         })
     }).catch(reason => {
-        document.getElementById('cross').className = "";
-        document.getElementById('disc').className = "hidden";
-
-        document.getElementById('title').textContent = "Server is down";
-        document.getElementById('author').textContent = "Sasisa-San...";
-        console.log('Failed fetching /next route');
-        setTimeout(UpdateSong, 2500);
+        InitiateError();
     })
+}
+
+function InitiateError() {
+    if(CurrentAudio) CurrentAudio.pause();
+
+    document.getElementById('cross').className = "";
+    document.getElementById('disc').className = "hidden";
+
+    document.getElementById('title').textContent = "Server is down";
+    document.getElementById('author').textContent = "Sasisa-San...";
+    console.log('Failed fetching /next route');
+    setTimeout(UpdateSong, 2500);
 }
 
 const Colors = [
